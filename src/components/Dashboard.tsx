@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -81,9 +82,9 @@ const Dashboard = () => {
       await sendAlert(waterLevel, seismicData, userEmail, mapImageData);
       
       // Flash effect for threshold crossing
-      document.body.style.animation = 'flash 0.5s ease-in-out';
+      document.body.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
       setTimeout(() => {
-        document.body.style.animation = '';
+        document.body.style.backgroundColor = '';
       }, 500);
 
     } catch (error) {
@@ -310,14 +311,6 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-
-      {/* Flash animation styles */}
-      <style jsx>{`
-        @keyframes flash {
-          0%, 100% { background-color: transparent; }
-          50% { background-color: rgba(239, 68, 68, 0.1); }
-        }
-      `}</style>
     </section>
   );
 };
