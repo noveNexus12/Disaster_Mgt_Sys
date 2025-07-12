@@ -75,43 +75,46 @@ const AlertMap = ({ alerts, onMapCapture }: AlertMapProps) => {
       </CardHeader>
       <CardContent>
         <div ref={mapRef} className="h-64 w-full rounded-lg overflow-hidden border border-border">
-          <MapContainer
-            center={centerPosition}
-            zoom={10}
-            style={{ height: "100%", width: "100%" }}
-            whenReady={() => setMapReady(true)}
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            
-            {alerts.map((alert, index) => (
-              <CircleMarker
-                key={`${alert.lat}-${alert.lng}-${index}`}
-                center={[alert.lat, alert.lng]}
-                radius={15}
-                pathOptions={{
-                  fillColor: getAlertColor(alert.type),
-                  color: getAlertColor(alert.type),
-                  weight: 3,
-                  opacity: 0.8,
-                  fillOpacity: 0.6,
-                }}
-              >
-                <Popup>
-                  <div className="text-sm">
-                    <div className="font-semibold">{getAlertLabel(alert)}</div>
-                    <div className="text-muted-foreground">
-                      {alert.timestamp.toLocaleString()}
+          {typeof window !== 'undefined' && (
+            <MapContainer
+              center={centerPosition}
+              zoom={10}
+              style={{ height: "100%", width: "100%" }}
+              whenReady={() => setMapReady(true)}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              
+              {alerts.map((alert, index) => (
+                <CircleMarker
+                  key={`${alert.lat}-${alert.lng}-${index}`}
+                  center={[alert.lat, alert.lng]}
+                  radius={15}
+                  pathOptions={{
+                    fillColor: getAlertColor(alert.type),
+                    color: getAlertColor(alert.type),
+                    weight: 3,
+                    opacity: 0.8,
+                    fillOpacity: 0.6,
+                  }}
+                >
+                  <Popup>
+                    <div className="text-sm">
+                      <div className="font-semibold">{getAlertLabel(alert)}</div>
+                      <div className="text-muted-foreground">
+                        {alert.timestamp.toLocaleString()}
+                      </div>
+                      <div className="text-xs">
+                        Lat: {alert.lat.toFixed(4)}, Lng: {alert.lng.toFixed(4)}
+                      </div>
                     </div>
-                    <div className="text-xs">
-                      Lat: {alert.lat.toFixed(4)}, Lng: {alert.lng.toFixed(4)}
-                    </div>
-                  </div>
-                </Popup>
-              </CircleMarker>
-            ))}
-          </MapContainer>
+                  </Popup>
+                </CircleMarker>
+              ))}
+            </MapContainer>
+          )}
         </div>
         
         <div className="mt-2 text-xs text-muted-foreground">
