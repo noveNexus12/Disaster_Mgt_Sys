@@ -1,25 +1,110 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Activity, Waves, AlertTriangle, TrendingUp, MapPin } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { useToast } from "@/hooks/use-toast";
+import SensorSimulator from "./SensorSimulator";
+import AlertMap from "./AlertMap";
+import { checkThresholds, sendAlert, createAlertLocation, AlertLocation } from "../services/alertService";
 
 const Dashboard = () => {
+  const { toast } = useToast();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [seismicData, setSeismicData] = useState<number>(2.1);
   const [waterLevel, setWaterLevel] = useState<number>(85);
+  const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
+  const [alerts, setAlerts] = useState<AlertLocation[]>([]);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [mapImageData, setMapImageData] = useState<string>("");
   
-  // Simulated real-time data
+  // Check subscription status on mount
+  useEffect(() => {
+    const subscribed = localStorage.getItem('alertSubscribed') === 'true';
+    const email = localStorage.getItem('userEmail') || "";
+    setIsSubscribed(subscribed);
+    setUserEmail(email);
+  }, []);
+
+  // Listen for subscription updates
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const subscribed = localStorage.getItem('alertSubscribed') === 'true';
+      const email = localStorage.getItem('userEmail') || "";
+      setIsSubscribed(subscribed);
+      setUserEmail(email);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Simulated real-time data updates
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
-      setSeismicData(prev => Math.max(0, prev + (Math.random() - 0.5) * 0.5));
-      setWaterLevel(prev => Math.max(0, Math.min(200, prev + (Math.random() - 0.5) * 5)));
+      // Only update if not manually controlled by simulator
+      if (!document.querySelector('[data-simulator-active]')) {
+        setSeismicData(prev => Math.max(0, prev + (Math.random() - 0.5) * 0.5));
+        setWaterLevel(prev => Math.max(0, Math.min(200, prev + (Math.random() - 0.5) * 5)));
+      }
     }, 2000);
 
     return () => clearInterval(timer);
   }, []);
+
+  // Check thresholds and trigger alerts
+  useEffect(() => {
+    if (checkThresholds(waterLevel, seismicData) && isSubscribed && userEmail) {
+      handleThresholdAlert();
+    }
+  }, [waterLevel, seismicData, isSubscribed, userEmail]);
+
+  const handleSensorUpdate = (newWaterLevel: number, newEarthquakeIntensity: number) => {
+    setWaterLevel(newWaterLevel);
+    setSeismicData(newEarthquakeIntensity);
+    
+    // Mark as manually controlled
+    document.body.setAttribute('data-simulator-active', 'true');
+    setTimeout(() => {
+      document.body.removeAttribute('data-simulator-active');
+    }, 5000);
+  };
+
+  const handleThresholdAlert = async () => {
+    try {
+      // Create alert location
+      const alertLocation = createAlertLocation(waterLevel, seismicData);
+      setAlerts(prev => [...prev, alertLocation]);
+
+      // Send email alert
+      await sendAlert(waterLevel, seismicData, userEmail, mapImageData);
+      
+      // Flash effect for threshold crossing
+      document.body.style.animation = 'flash 0.5s ease-in-out';
+      setTimeout(() => {
+        document.body.style.animation = '';
+      }, 500);
+
+    } catch (error) {
+      console.error('Alert failed:', error);
+      toast({
+        title: "Alert Failed",
+        description: "Unable to send alert notification. Please check your connection.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleTestAlert = () => {
+    if (isSubscribed && userEmail) {
+      handleThresholdAlert();
+    }
+  };
+
+  const handleMapCapture = (imageData: string) => {
+    setMapImageData(imageData);
+  };
 
   const getRiskLevel = () => {
     if (seismicData > 4 || waterLevel > 150) return { level: "High", color: "bg-red-500", textColor: "text-red-500" };
@@ -110,6 +195,19 @@ const Dashboard = () => {
               <p className="text-xs text-muted-foreground">Online monitoring stations</p>
             </CardContent>
           </Card>
+        </div>
+
+        {/* New Simulator and Map Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          <SensorSimulator 
+            onSensorUpdate={handleSensorUpdate}
+            onTestAlert={handleTestAlert}
+            isSubscribed={isSubscribed}
+          />
+          <AlertMap 
+            alerts={alerts}
+            onMapCapture={handleMapCapture}
+          />
         </div>
 
         {/* Charts Section */}
@@ -212,6 +310,14 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Flash animation styles */}
+      <style jsx>{`
+        @keyframes flash {
+          0%, 100% { background-color: transparent; }
+          50% { background-color: rgba(239, 68, 68, 0.1); }
+        }
+      `}</style>
     </section>
   );
 };

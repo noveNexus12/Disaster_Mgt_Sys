@@ -51,6 +51,13 @@ const Contact = () => {
         '64mjTCo0st8WIug8G'
       );
 
+      // Set subscription status
+      localStorage.setItem('alertSubscribed', 'true');
+      localStorage.setItem('userEmail', formData.email);
+      
+      // Trigger storage event for other components
+      window.dispatchEvent(new Event('storage'));
+
       toast({
         title: "Alert Subscription Successful!",
         description: "You've been registered for disaster alerts. We'll notify you of any threats in your area.",
