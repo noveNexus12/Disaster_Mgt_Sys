@@ -6,7 +6,6 @@ import { Activity, Waves, AlertTriangle, TrendingUp, MapPin } from "lucide-react
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import SensorSimulator from "./SensorSimulator";
-import AlertMap from "./AlertMap";
 import { checkThresholds, sendAlert, createAlertLocation, AlertLocation } from "../services/alertService";
 
 const Dashboard = () => {
@@ -17,7 +16,6 @@ const Dashboard = () => {
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const [alerts, setAlerts] = useState<AlertLocation[]>([]);
   const [userEmail, setUserEmail] = useState<string>("");
-  const [mapImageData, setMapImageData] = useState<string>("");
   
   // Check subscription status on mount
   useEffect(() => {
@@ -79,7 +77,7 @@ const Dashboard = () => {
       setAlerts(prev => [...prev, alertLocation]);
 
       // Send email alert
-      await sendAlert(waterLevel, seismicData, userEmail, mapImageData);
+      await sendAlert(waterLevel, seismicData, userEmail);
       
       // Flash effect for threshold crossing
       document.body.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
@@ -101,10 +99,6 @@ const Dashboard = () => {
     if (isSubscribed && userEmail) {
       handleThresholdAlert();
     }
-  };
-
-  const handleMapCapture = (imageData: string) => {
-    setMapImageData(imageData);
   };
 
   const getRiskLevel = () => {
@@ -198,16 +192,12 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* New Simulator and Map Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        {/* Sensor Simulator Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-8 mb-12">
           <SensorSimulator 
             onSensorUpdate={handleSensorUpdate}
             onTestAlert={handleTestAlert}
             isSubscribed={isSubscribed}
-          />
-          <AlertMap 
-            alerts={alerts}
-            onMapCapture={handleMapCapture}
           />
         </div>
 
