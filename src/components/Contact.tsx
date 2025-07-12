@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,10 +44,10 @@ const Contact = () => {
       };
 
       await emailjs.send(
-        'service_oi9vnuc',
-        'template_t2pqnse',
+        'service_vzlfeat',
+        'template_uil2svj',
         templateParams,
-        '64mjTCo0st8WIug8G'
+        '6k-kCYEoje5LFKwjq'
       );
 
       // Set subscription status

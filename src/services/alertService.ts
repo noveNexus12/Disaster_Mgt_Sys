@@ -16,8 +16,7 @@ export const checkThresholds = (waterLevel: number, earthquakeIntensity: number)
 export const sendAlert = async (
   waterLevel: number, 
   earthquakeIntensity: number, 
-  userEmail: string,
-  mapImageData?: string
+  userEmail: string
 ): Promise<void> => {
   const isFloodAlert = waterLevel > 150;
   const isEarthquakeAlert = earthquakeIntensity > 4.0;
@@ -57,7 +56,6 @@ export const sendAlert = async (
     timestamp: timestamp,
     latitude: location.lat.toFixed(4),
     longitude: location.lng.toFixed(4),
-    map_image: mapImageData || '',
     message: `
       DISASTER ALERT NOTIFICATION
       
@@ -74,10 +72,10 @@ export const sendAlert = async (
 
   try {
     await emailjs.send(
-      'service_oi9vnuc',
-      'template_t2pqnse',
+      'service_vzlfeat',
+      'template_uil2svj',
       templateParams,
-      '64mjTCo0st8WIug8G'
+      '6k-kCYEoje5LFKwjq'
     );
     console.log('Alert sent successfully');
   } catch (error) {
