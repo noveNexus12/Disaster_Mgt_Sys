@@ -79,23 +79,24 @@ const AlertMap = ({ alerts, onMapCapture }: AlertMapProps) => {
             center={centerPosition}
             zoom={10}
             style={{ height: "100%", width: "100%" }}
-            whenCreated={() => setMapReady(true)}
+            whenReady={() => setMapReady(true)}
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution="© OpenStreetMap contributors"
             />
             
             {alerts.map((alert, index) => (
               <CircleMarker
                 key={`${alert.lat}-${alert.lng}-${index}`}
                 center={[alert.lat, alert.lng]}
+                radius={15}
                 pathOptions={{
                   fillColor: getAlertColor(alert.type),
                   color: getAlertColor(alert.type),
                   weight: 3,
                   opacity: 0.8,
                   fillOpacity: 0.6,
-                  radius: 15,
                 }}
               >
                 <Popup>
