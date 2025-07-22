@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Welcome to your Lovable project
 
 ## Project info
@@ -71,3 +72,7 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+=======
+# Disaster_Mgt_Sys
+Disaster Management System for Earthquake &amp; Flood detection
+>>>>>>> a397a6f9579f2ebd7d398e1bed1d3d06468eb00a
