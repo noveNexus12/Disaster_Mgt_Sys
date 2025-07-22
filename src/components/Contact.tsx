@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Phone, MapPin, Bell } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import emailjs from '@emailjs/browser';
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase"; // adjust if path differs
 
 const Contact = () => {
   const { toast } = useToast();
@@ -34,28 +36,36 @@ const Contact = () => {
 
     try {
       const templateParams = {
-        from_name: formData.name,
-        from_email: formData.email,
-        phone: formData.phone,
-        organization: formData.organization,
-        alert_type: formData.alertType,
-        message: formData.message,
-        to_name: 'DisasterGuard AI Team'
-      };
+      name: formData.name,
+      user_email: formData.email, // ✅ Fix this name
+      phone: formData.phone,
+      organization: formData.organization,
+      alert_type: formData.alertType,
+      message: formData.message,
+      email: formData.email, // optional: if used in `{{email}}` or "Reply To"
+      time: new Date().toLocaleString(),
+      title: "Alert Request from Contact Form"
+};
+
 
       await emailjs.send(
-        'service_vzlfeat',
-        'template_uil2svj',
+        'service_yoggzze',
+        'template_lgg6tdr',
         templateParams,
-        '6k-kCYEoje5LFKwjq'
+        'jlQpoCUVRZ5CfHBZ-'
       );
 
-      // Set subscription status
-      localStorage.setItem('alertSubscribed', 'true');
-      localStorage.setItem('userEmail', formData.email);
-      
-      // Trigger storage event for other components
-      window.dispatchEvent(new Event('storage'));
+      // Save email to Firestore
+      await addDoc(collection(db, "subscribers"), {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone, // ✅ store the phone number
+        organization: formData.organization, // optional but useful
+        alertType: formData.alertType,
+        message: formData.message,
+        timestamp: new Date()
+    });
+
 
       toast({
         title: "Alert Subscription Successful!",
